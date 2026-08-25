@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>練習注音 · ฝึกอ่าน-พิมพ์จู้อิน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&family=Noto+Sans+Thai:wght@400;500;600;700&family=Noto+Sans:wght@400;500;600&family=Noto+Sans+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F2ECDC;
+    --paper-2:#EAE2CC;
+    --ink:#242220;
+    --ink-soft:#6b6355;
+    --seal:#C9372C;
+    --seal-soft:#c9372c22;
+    --jade:#3F6B5E;
+    --jade-soft:#3f6b5e1c;
+    --gold:#AD8A4E;
+    --line:#c9372c3d;
+    --card:#FBF8EF;
+    --radius:14px;
+    --shadow: 0 1px 2px rgba(36,34,32,.06), 0 8px 24px -12px rgba(36,34,32,.25);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 10% -10%, #fffdf5 0%, transparent 60%),
+      var(--paper);
+    color:var(--ink);
+    font-family:'Noto Sans Thai','Noto Sans',sans-serif;
+    min-height:100vh;
+    padding:28px 18px 60px;
+  }
+  .wrap{max-width:980px;margin:0 auto;}
+
+  /* ---------- Header ---------- */
+  header.top{
+    display:flex; align-items:flex-end; justify-content:space-between; gap:16px;
+    margin-bottom:22px; flex-wrap:wrap;
+  }
+  .brand{display:flex; align-items:center; gap:14px;}
+  .seal-badge{
+    width:56px;height:56px;border-radius:10px;
+    background:var(--seal); color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Noto Serif TC',serif; font-weight:900; font-size:26px;
+    box-shadow: var(--shadow);
+    transform:rotate(-3deg);
+    flex-shrink:0;
+  }
+  .brand h1{
+    font-family:'Noto Serif TC',serif; font-weight:900;
+    font-size:28px; margin:0; letter-spacing:.02em;
+  }
+  .brand p{margin:2px 0 0; color:var(--ink-soft); font-size:14px;}
+  .stats{
+    display:flex; gap:10px;
+  }
+  .stat{
+    background:var(--card); border:1px solid var(--line); border-radius:10px;
+    padding:8px 14px; text-align:center; min-width:78px; box-shadow:var(--shadow);
+  }
+  .stat b{display:block; font-size:20px; font-family:'Noto Sans Mono',monospace; color:var(--seal);}
+  .stat span{font-size:11px; color:var(--ink-soft);}
+
+  /* ---------- Tabs ---------- */
+  .tabs{display:flex; gap:8px; margin-bottom:18px;}
+  .tab{
+    flex:1; text-align:center; cursor:pointer; user-select:none;
+    padding:12px 10px; border-radius:12px; border:1px solid var(--line);
+    background:var(--paper-2); font-weight:600; font-size:15px;
+    color:var(--ink-soft); transition:.15s ease;
+  }
+  .tab .zh{font-family:'Noto Serif TC',serif; font-size:13px; display:block; margin-bottom:2px; letter-spacing:.05em;}
+  .tab.active{background:var(--ink); color:var(--paper); border-color:var(--ink);}
+
+  /* ---------- Layout ---------- */
+  .layout{display:grid; grid-template-columns:280px 1fr; gap:18px;}
+  @media (max-width:760px){ .layout{grid-template-columns:1fr;} }
+
+  .panel{
+    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+    padding:16px; box-shadow:var(--shadow);
+  }
+  .panel h2{
+    font-family:'Noto Serif TC',serif; font-size:16px; margin:0 0 10px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .panel h2::before{content:""; width:6px;height:6px;background:var(--seal); border-radius:50%;}
+
+  /* word list panel */
+  .file-row{display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap;}
+  .btn{
+    appearance:none; border:1px solid var(--ink); background:var(--ink); color:var(--paper);
+    padding:9px 14px; border-radius:9px; font-size:13.5px; font-weight:600; cursor:pointer;
+    transition:.15s; font-family:inherit;
+  }
+  .btn:hover{opacity:.85;}
+  .btn.ghost{background:transparent; color:var(--ink); border-color:var(--line);}
+  .btn.seal{background:var(--seal); border-color:var(--seal);}
+  .btn.jade{background:var(--jade); border-color:var(--jade);}
+  .btn:disabled{opacity:.4; cursor:not-allowed;}
+  input[type=file]{display:none;}
+
+  textarea#wordlistInput{
+    width:100%; min-height:120px; resize:vertical; border:1px solid var(--line);
+    border-radius:8px; padding:10px; font-family:'Noto Sans Mono',monospace; font-size:12.5px;
+    background:#fffefb; color:var(--ink); line-height:1.6;
+  }
+  .hint{font-size:11.5px; color:var(--ink-soft); margin:8px 0; line-height:1.6;}
+  .hint code{background:var(--paper-2); padding:1px 5px; border-radius:4px;}
+  .count-pill{
+    display:inline-flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink-soft);
+    margin-top:6px;
+  }
+  .count-pill b{color:var(--ink); font-family:'Noto Sans Mono',monospace;}
+  #parseMsg{font-size:12px; margin-top:6px; min-height:16px;}
+  #parseMsg.err{color:var(--seal); font-weight:600;}
+  #parseMsg.ok{color:var(--jade); font-weight:600;}
+
+  /* ---------- Practice area ---------- */
+  .practice{display:flex; flex-direction:column; gap:16px;}
+
+  /* tian-zi-ge card */
+  .tzg{
+    position:relative; width:220px; height:220px; margin:0 auto;
+    background:var(--card); border:2px solid var(--ink);
+  }
+  .tzg::before, .tzg::after{
+    content:""; position:absolute; background:var(--line);
+  }
+  .tzg::before{ left:50%; top:0; bottom:0; width:1px; transform:translateX(-50%); }
+  .tzg::after{ top:50%; left:0; right:0; height:1px; transform:translateY(-50%); }
+  .tzg .diag{position:absolute; inset:0;}
+  .tzg .diag i{position:absolute; background:var(--line); width:1px; height:141.4%; top:50%; left:50%; }
+  .tzg .diag i.d1{transform:translate(-50%,-50%) rotate(45deg);}
+  .tzg .diag i.d2{transform:translate(-50%,-50%) rotate(-45deg);}
+  .tzg .char{
+    position:relative; z-index:2; width:100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Noto Serif TC',serif; font-weight:700; font-size:120px; color:var(--ink);
+    line-height:1;
+  }
+
+  .reveal-zone{text-align:center; min-height:46px;}
+  .zhuyin-big{
+    font-family:'Noto Sans Mono',monospace; font-size:34px; letter-spacing:.08em;
+    color:var(--seal); font-weight:700;
+  }
+  .word-caption{text-align:center; color:var(--ink-soft); font-size:13px; margin-top:-6px;}
+
+  .controls-row{display:flex; justify-content:center; gap:10px; flex-wrap:wrap;}
+
+  /* typing mode */
+  .type-target{display:flex; flex-direction:column; align-items:center; gap:10px;}
+  .buffer-box{
+    min-width:260px; text-align:center; font-family:'Noto Sans Mono',monospace;
+    font-size:30px; letter-spacing:.12em; padding:12px 20px; border-radius:10px;
+    background:#fffefb; border:2px dashed var(--line); color:var(--ink); min-height:52px;
+  }
+  .buffer-box.correct{border-color:var(--jade); background:var(--jade-soft); color:var(--jade);}
+  .buffer-box.wrong{border-color:var(--seal); background:var(--seal-soft); color:var(--seal);}
+  .answer-line{font-size:13px; color:var(--ink-soft); min-height:18px; text-align:center;}
+  .answer-line b{color:var(--seal); font-family:'Noto Sans Mono',monospace;}
+
+  /* virtual keyboard */
+  .kbd{max-width:760px; margin:0 auto; user-select:none;}
+  .kbd .row{display:flex; gap:6px; margin-bottom:6px; justify-content:center;}
+  .kbd .row:nth-child(2){margin-left:22px;}
+  .kbd .row:nth-child(3){margin-left:32px;}
+  .kbd .row:nth-child(4){margin-left:52px;}
+  .key{
+    width:60px; height:52px; border-radius:8px; background:var(--paper-2);
+    border:1px solid var(--line); display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:1px; transition:.08s;
+  }
+  .key .zy{font-family:'Noto Serif TC',serif; font-weight:700; font-size:17px; color:var(--ink);}
+  .key .lt{font-size:9px; color:var(--ink-soft); font-family:'Noto Sans Mono',monospace;}
+  .key.tone .zy{color:var(--seal);}
+  .key.active{background:var(--ink); transform:translateY(1px);}
+  .key.active .zy{color:var(--paper);}
+  .key.active .lt{color:var(--paper-2);}
+
+  .space-row{display:flex; justify-content:center; margin-top:6px;}
+  .spacebar{
+    width:320px; height:34px; border-radius:8px; background:var(--paper-2);
+    border:1px solid var(--line); display:flex; align-items:center; justify-content:center;
+    font-size:11.5px; color:var(--ink-soft);
+  }
+  .spacebar.active{background:var(--ink); color:var(--paper);}
+
+  .empty{
+    text-align:center; color:var(--ink-soft); font-size:14px; padding:40px 10px;
+  }
+  footer.note{
+    text-align:center; font-size:12px; color:var(--ink-soft); margin-top:26px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">
+      <div class="seal-badge">音</div>
+      <div>
+        <h1>練習注音</h1>
+        <p>ฝึกอ่านและฝึกพิมพ์จู้อิน (Zhuyin / Bopomofo)</p>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><b id="statTotal">0</b><span>คำทั้งหมด</span></div>
+      <div class="stat"><b id="statCorrect">0</b><span>ถูก</span></div>
+      <div class="stat"><b id="statAttempt">0</b><span>ทำไปแล้ว</span></div>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <div class="tab active" data-mode="read" id="tabRead"><span class="zh">閱讀</span>โหมดฝึกอ่าน</div>
+    <div class="tab" data-mode="type" id="tabType"><span class="zh">打字</span>โหมดฝึกพิมพ์</div>
+  </div>
+
+  <div class="layout">
+    <!-- LEFT: word list management -->
+    <div class="panel">
+      <h2>คลังคำศัพท์</h2>
+      <div class="file-row">
+        <label class="btn" for="fileInput">อัปโหลดไฟล์</label>
+        <input type="file" id="fileInput" accept=".txt,.csv">
+        <button class="btn ghost" id="btnSample">ใช้ชุดตัวอย่าง</button>
+      </div>
+      <textarea id="wordlistInput" placeholder="你好,ㄋㄧˇ ㄏㄠˇ
+謝謝,ㄒㄧㄝˋ ㄒㄧㄝ˙
+一,ㄧ"></textarea>
+      <div class="file-row" style="margin-top:8px;">
+        <button class="btn jade" id="btnApply">ใช้ชุดคำนี้</button>
+      </div>
+      <div id="parseMsg"></div>
+      <div class="hint">
+        รูปแบบไฟล์: หนึ่งบรรทัดต่อหนึ่งคำ เขียนเป็น <code>ตัวอักษร,จู้อิน</code> (คั่นด้วยจุลภาคหรือแท็บ)
+        ถ้าเป็นคำหลายพยางค์ ให้เว้นวรรคระหว่างจู้อินแต่ละพยางค์ เช่น <code>你好,ㄋㄧˇ ㄏㄠˇ</code>.
+        รองรับไฟล์ .txt และ .csv — บรรทัดที่ขึ้นต้นด้วย <code>#</code> จะถูกข้าม
+      </div>
+      <div class="count-pill">คำในคลังตอนนี้: <b id="wordCount">0</b> คำ</div>
+    </div>
+
+    <!-- RIGHT: practice area -->
+    <div class="practice">
+
+      <!-- READ MODE -->
+      <div class="panel" id="readPanel">
+        <h2>บัตรคำฝึกอ่าน</h2>
+        <div id="readEmpty" class="empty">อัปโหลดหรือวางคำศัพท์ทางซ้าย แล้วกด “ใช้ชุดคำนี้” เพื่อเริ่มฝึก</div>
+        <div id="readBody" style="display:none;">
+          <div class="tzg" id="readCard">
+            <div class="diag"><i class="d1"></i><i class="d2"></i></div>
+            <div class="char" id="readChar">你</div>
+          </div>
+          <div class="reveal-zone" style="margin-top:14px;">
+            <div class="zhuyin-big" id="readZhuyin" style="visibility:hidden;">ㄋㄧˇ</div>
+          </div>
+          <div class="controls-row" style="margin-top:14px;">
+            <button class="btn ghost" id="btnReveal">เผยจู้อิน (Space)</button>
+            <button class="btn jade" id="btnKnow">รู้แล้ว ✓</button>
+            <button class="btn seal" id="btnDontKnow">ยังไม่รู้ ✗</button>
+            <button class="btn ghost" id="btnShuffleRead">สลับใหม่</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TYPE MODE -->
+      <div class="panel" id="typePanel" style="display:none;">
+        <h2>ฝึกพิมพ์จู้อิน (คีย์บอร์ดมาตรฐาน 大千)</h2>
+        <div id="typeEmpty" class="empty">อัปโหลดหรือวางคำศัพท์ทางซ้าย แล้วกด “ใช้ชุดคำนี้” เพื่อเริ่มฝึก</div>
+        <div id="typeBody" style="display:none;">
+          <div class="type-target">
+            <div class="tzg" style="width:150px;height:150px;">
+              <div class="diag"><i class="d1"></i><i class="d2"></i></div>
+              <div class="char" id="typeChar" style="font-size:80px;">你</div>
+            </div>
+            <div class="word-caption" id="typeWordCaption"></div>
+            <div class="buffer-box" id="bufferBox">&nbsp;</div>
+            <div class="answer-line" id="answerLine">&nbsp;</div>
+            <div class="controls-row">
+              <button class="btn ghost" id="btnBackspace">ลบ (Backspace)</button>
+              <button class="btn jade" id="btnSubmit">ตรวจคำตอบ (Enter/Space)</button>
+              <button class="btn ghost" id="btnSkip">ข้าม</button>
+            </div>
+          </div>
+          <div class="kbd" id="kbd" style="margin-top:22px;"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer class="note">พิมพ์ด้วยตำแหน่งปุ่มจริงบนคีย์บอร์ด (ไม่ขึ้นกับภาษาที่ตั้งไว้ในเครื่อง) — ใช้ผังแป้นพิมพ์注音มาตรฐาน (大千 / 標準)</footer>
+</div>
+
+<script>
+/* =========================================================
+   Standard Zhuyin ("大千"/Standard) physical keyboard mapping
+   keyed by e.code so it works regardless of OS input language
+   ========================================================= */
+const KEYMAP = {
+  Digit1:'ㄅ', Digit2:'ㄉ', Digit3:'ˇ', Digit4:'ˋ', Digit5:'ㄓ',
+  Digit6:'ˊ', Digit7:'˙', Digit8:'ㄚ', Digit9:'ㄞ', Digit0:'ㄢ', Minus:'ㄦ',
+
+  KeyQ:'ㄆ', KeyW:'ㄊ', KeyE:'ㄍ', KeyR:'ㄐ', KeyT:'ㄔ',
+  KeyY:'ㄗ', KeyU:'ㄧ', KeyI:'ㄛ', KeyO:'ㄟ', KeyP:'ㄣ',
+
+  KeyA:'ㄇ', KeyS:'ㄋ', KeyD:'ㄎ', KeyF:'ㄑ', KeyG:'ㄕ',
+  KeyH:'ㄘ', KeyJ:'ㄨ', KeyK:'ㄜ', KeyL:'ㄠ', Semicolon:'ㄤ',
+
+  KeyZ:'ㄈ', KeyX:'ㄌ', KeyC:'ㄏ', KeyV:'ㄒ', KeyB:'ㄖ',
+  KeyN:'ㄙ', KeyM:'ㄩ', Comma:'ㄝ', Period:'ㄡ', Slash:'ㄥ'
+};
+const TONE_CODES = new Set(['Digit3','Digit4','Digit6','Digit7']);
+
+const KBD_ROWS = [
+  ['Digit1','Digit2','Digit3','Digit4','Digit5','Digit6','Digit7','Digit8','Digit9','Digit0','Minus'],
+  ['KeyQ','KeyW','KeyE','KeyR','KeyT','KeyY','KeyU','KeyI','KeyO','KeyP'],
+  ['KeyA','KeyS','KeyD','KeyF','KeyG','KeyH','KeyJ','KeyK','KeyL','Semicolon'],
+  ['KeyZ','KeyX','KeyC','KeyV','KeyB','KeyN','KeyM','Comma','Period','Slash']
+];
+const LETTER_LABEL = {
+  Digit1:'1',Digit2:'2',Digit3:'3',Digit4:'4',Digit5:'5',Digit6:'6',Digit7:'7',Digit8:'8',Digit9:'9',Digit0:'0',Minus:'-',
+  KeyQ:'Q',KeyW:'W',KeyE:'E',KeyR:'R',KeyT:'T',KeyY:'Y',KeyU:'U',KeyI:'I',KeyO:'O',KeyP:'P',
+  KeyA:'A',KeyS:'S',KeyD:'D',KeyF:'F',KeyG:'G',KeyH:'H',KeyJ:'J',KeyK:'K',KeyL:'L',Semicolon:';',
+  KeyZ:'Z',KeyX:'X',KeyC:'C',KeyV:'V',KeyB:'B',KeyN:'N',KeyM:'M',Comma:',',Period:'.',Slash:'/'
+};
+
+const SAMPLE = `# ตัวอย่างชุดคำเริ่มต้น — ลบแล้วพิมพ์ของตัวเองได้เลย
+一,ㄧ
+二,ㄦˋ
+三,ㄙㄢ
+四,ㄙˋ
+五,ㄨˇ
+六,ㄌㄧㄡˋ
+七,ㄑㄧ
+八,ㄅㄚ
+九,ㄐㄧㄡˇ
+十,ㄕˊ
+人,ㄖㄣˊ
+大,ㄉㄚˋ
+小,ㄒㄧㄠˇ
+天,ㄊㄧㄢ
+地,ㄉㄧˋ
+山,ㄕㄢ
+水,ㄕㄨㄟˇ
+火,ㄏㄨㄛˇ
+你好,ㄋㄧˇ ㄏㄠˇ
+謝謝,ㄒㄧㄝˋ ㄒㄧㄝ˙`;
+
+/* ---------------- state ---------------- */
+let wordList = [];   // [{hanzi, zhuyin}]
+let charPool = [];   // [{char, zhuyin, word}]
+let mode = 'read';
+
+let readOrder = [], readIdx = 0, readRevealed = false;
+let typeOrder = [], typeIdx = 0, buffer = '';
+let score = { correct: 0, attempts: 0 };
+
+/* ---------------- parsing ---------------- */
+function parseWordlist(text){
+  const lines = text.split('\n');
+  const list = [];
+  let badLines = 0;
+  for(const raw of lines){
+    const line = raw.trim();
+    if(!line || line.startsWith('#')) continue;
+    const m = line.split(/[,\t]/);
+    if(m.length < 2){ badLines++; continue; }
+    const hanzi = m[0].trim();
+    const zhuyin = m.slice(1).join(',').trim();
+    if(!hanzi || !zhuyin){ badLines++; continue; }
+    list.push({hanzi, zhuyin});
+  }
+  return {list, badLines};
+}
+
+function buildCharPool(list){
+  const pool = [];
+  for(const {hanzi, zhuyin} of list){
+    const chars = Array.from(hanzi);
+    const groups = zhuyin.split(/\s+/).filter(Boolean);
+    if(chars.length === groups.length){
+      chars.forEach((c,i)=> pool.push({char:c, zhuyin:groups[i], word:hanzi}));
+    } else if(chars.length === 1 && groups.length >= 1){
+      pool.push({char:chars[0], zhuyin:groups.join(''), word:hanzi});
+    }
+    // if lengths mismatch and multi-char, skip typing pairing (reading mode still works)
+  }
+  return pool;
+}
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+/* ---------------- apply word list ---------------- */
+const msgEl = document.getElementById('parseMsg');
+const wordCountEl = document.getElementById('wordCount');
+
+function applyWordlist(text){
+  const {list, badLines} = parseWordlist(text);
+  if(list.length === 0){
+    msgEl.textContent = 'ไม่พบข้อมูลที่ใช้ได้ ตรวจสอบรูปแบบอีกครั้ง (ต้องมี ตัวอักษร,จู้อิน อย่างน้อย 1 บรรทัด)';
+    msgEl.className = 'err';
+    return;
+  }
+  wordList = list;
+  charPool = buildCharPool(list);
+  wordCountEl.textContent = wordList.length;
+  msgEl.textContent = badLines>0
+    ? `โหลดสำเร็จ ${list.length} คำ (ข้าม ${badLines} บรรทัดที่รูปแบบไม่ถูกต้อง)`
+    : `โหลดสำเร็จ ${list.length} คำ`;
+  msgEl.className = 'ok';
+
+  document.getElementById('statTotal').textContent = wordList.length;
+
+  readOrder = shuffle(wordList.map((_,i)=>i));
+  readIdx = 0; readRevealed = false;
+  typeOrder = shuffle(charPool.map((_,i)=>i));
+  typeIdx = 0; buffer = '';
+
+  renderRead();
+  renderType();
+}
+
+document.getElementById('btnApply').addEventListener('click', ()=>{
+  applyWordlist(document.getElementById('wordlistInput').value);
+});
+document.getElementById('btnSample').addEventListener('click', ()=>{
+  document.getElementById('wordlistInput').value = SAMPLE;
+  applyWordlist(SAMPLE);
+});
+document.getElementById('fileInput').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev)=>{
+    document.getElementById('wordlistInput').value = ev.target.result;
+    applyWordlist(ev.target.result);
+  };
+  reader.onerror = ()=>{
+    msgEl.textContent = 'อ่านไฟล์ไม่สำเร็จ ลองใหม่อีกครั้ง';
+    msgEl.className = 'err';
+  };
+  reader.readAsText(file, 'utf-8');
+});
+
+/* ---------------- tabs ---------------- */
+document.getElementById('tabRead').addEventListener('click', ()=> switchMode('read'));
+document.getElementById('tabType').addEventListener('click', ()=> switchMode('type'));
+function switchMode(m){
+  mode = m;
+  document.getElementById('tabRead').classList.toggle('active', m==='read');
+  document.getElementById('tabType').classList.toggle('active', m==='type');
+  document.getElementById('readPanel').style.display = m==='read' ? '' : 'none';
+  document.getElementById('typePanel').style.display = m==='type' ? '' : 'none';
+}
+
+/* ---------------- READ MODE ---------------- */
+function renderRead(){
+  const empty = document.getElementById('readEmpty');
+  const body = document.getElementById('readBody');
+  if(wordList.length === 0){ empty.style.display=''; body.style.display='none'; return; }
+  empty.style.display='none'; body.style.display='';
+
+  const item = wordList[readOrder[readIdx]];
+  document.getElementById('readChar').textContent = item.hanzi;
+  document.getElementById('readZhuyin').textContent = item.zhuyin;
+  document.getElementById('readZhuyin').style.visibility = readRevealed ? 'visible' : 'hidden';
+}
+function nextRead(){
+  readIdx = (readIdx+1) % readOrder.length;
+  if(readIdx === 0) readOrder = shuffle(wordList.map((_,i)=>i));
+  readRevealed = false;
+  renderRead();
+}
+document.getElementById('btnReveal').addEventListener('click', ()=>{ readRevealed = true; renderRead(); });
+document.getElementById('btnKnow').addEventListener('click', ()=>{ nextRead(); });
+document.getElementById('btnDontKnow').addEventListener('click', ()=>{ nextRead(); });
+document.getElementById('btnShuffleRead').addEventListener('click', ()=>{
+  readOrder = shuffle(wordList.map((_,i)=>i)); readIdx=0; readRevealed=false; renderRead();
+});
+
+/* ---------------- TYPE MODE: virtual keyboard ---------------- */
+const kbdEl = document.getElementById('kbd');
+function buildKeyboard(){
+  kbdEl.innerHTML = '';
+  KBD_ROWS.forEach(row=>{
+    const rowEl = document.createElement('div');
+    rowEl.className = 'row';
+    row.forEach(code=>{
+      const key = document.createElement('div');
+      key.className = 'key' + (TONE_CODES.has(code) ? ' tone' : '');
+      key.dataset.code = code;
+      key.innerHTML = `<span class="zy">${KEYMAP[code]}</span><span class="lt">${LETTER_LABEL[code]}</span>`;
+      rowEl.appendChild(key);
+    });
+    kbdEl.appendChild(rowEl);
+  });
+  const spaceRow = document.createElement('div');
+  spaceRow.className = 'space-row';
+  spaceRow.innerHTML = `<div class="spacebar" id="spaceKey">Space — ยืนยันวรรณยุกต์เสียงที่ 1 / ตรวจคำตอบ</div>`;
+  kbdEl.appendChild(spaceRow);
+}
+function flashKey(code){
+  const el = kbdEl.querySelector(`.key[data-code="${code}"]`);
+  if(el){ el.classList.add('active'); setTimeout(()=>el.classList.remove('active'), 120); }
+}
+function flashSpace(){
+  const el = document.getElementById('spaceKey');
+  if(el){ el.classList.add('active'); setTimeout(()=>el.classList.remove('active'), 120); }
+}
+
+function renderType(){
+  const empty = document.getElementById('typeEmpty');
+  const body = document.getElementById('typeBody');
+  if(charPool.length === 0){ empty.style.display=''; body.style.display='none'; return; }
+  empty.style.display='none'; body.style.display='';
+
+  const item = charPool[typeOrder[typeIdx]];
+  document.getElementById('typeChar').textContent = item.char;
+  document.getElementById('typeWordCaption').textContent = item.word.length>1 ? `จากคำว่า ${item.word}` : '';
+  const box = document.getElementById('bufferBox');
+  box.textContent = buffer || '\u00A0';
+  box.className = 'buffer-box';
+  document.getElementById('answerLine').innerHTML = '&nbsp;';
+}
+function nextType(){
+  typeIdx = (typeIdx+1) % typeOrder.length;
+  if(typeIdx === 0) typeOrder = shuffle(charPool.map((_,i)=>i));
+  buffer = '';
+  renderType();
+}
+function submitType(){
+  if(charPool.length === 0) return;
+  const item = charPool[typeOrder[typeIdx]];
+  score.attempts++;
+  const box = document.getElementById('bufferBox');
+  const answerLine = document.getElementById('answerLine');
+  if(buffer === item.zhuyin){
+    score.correct++;
+    box.className = 'buffer-box correct';
+    answerLine.innerHTML = 'ถูกต้อง! ✓';
+    updateStats();
+    setTimeout(nextType, 550);
+  } else {
+    box.className = 'buffer-box wrong';
+    answerLine.innerHTML = `ที่ถูกคือ <b>${item.zhuyin}</b> — กด "ข้าม" เพื่อไปต่อ`;
+    updateStats();
+  }
+}
+function updateStats(){
+  document.getElementById('statCorrect').textContent = score.correct;
+  document.getElementById('statAttempt').textContent = score.attempts;
+}
+document.getElementById('btnBackspace').addEventListener('click', ()=>{
+  buffer = buffer.slice(0,-1); renderType();
+});
+document.getElementById('btnSubmit').addEventListener('click', submitType);
+document.getElementById('btnSkip').addEventListener('click', nextType);
+
+/* ---------------- physical keydown handling ---------------- */
+document.addEventListener('keydown', (e)=>{
+  if(document.activeElement && document.activeElement.tagName === 'TEXTAREA') return;
+  if(mode !== 'type' || charPool.length === 0) return;
+
+  if(e.code === 'Space'){
+    e.preventDefault();
+    flashSpace();
+    submitType();
+    return;
+  }
+  if(e.code === 'Enter'){
+    e.preventDefault();
+    submitType();
+    return;
+  }
+  if(e.code === 'Backspace'){
+    e.preventDefault();
+    buffer = buffer.slice(0,-1);
+    renderType();
+    return;
+  }
+  if(KEYMAP[e.code]){
+    e.preventDefault();
+    buffer += KEYMAP[e.code];
+    flashKey(e.code);
+    renderType();
+  }
+});
+
+/* ---------------- init ---------------- */
+buildKeyboard();
+document.getElementById('wordlistInput').value = SAMPLE;
+applyWordlist(SAMPLE);
+</script>
+</body>
+</html>
