@@ -191,6 +191,19 @@
   }
   .spacebar.active{background:var(--ink); color:var(--paper);}
 
+  /* passage (long-form) typing mode */
+  .passage-text{
+    font-family:'Noto Serif TC',serif; font-size:28px; line-height:2.1;
+    text-align:left; padding:14px 4px; word-break:break-word;
+  }
+  .pc{padding:2px 1px; border-radius:4px; transition:.15s;}
+  .pc.pending{color:var(--ink-soft);}
+  .pc.punct{color:var(--ink-soft); opacity:.6;}
+  .pc.current{background:var(--seal-soft); color:var(--ink); box-shadow:inset 0 -3px 0 var(--seal);}
+  .pc.correct{color:var(--jade);}
+  .pc.wrong{color:var(--seal); text-decoration:underline wavy var(--seal); text-underline-offset:3px;}
+  #passagePicker .btn.seal{opacity:1;}
+
   .empty{
     text-align:center; color:var(--ink-soft); font-size:14px; padding:40px 10px;
   }
@@ -220,30 +233,52 @@
   <div class="tabs">
     <div class="tab active" data-mode="read" id="tabRead"><span class="zh">閱讀</span>โหมดฝึกอ่าน</div>
     <div class="tab" data-mode="type" id="tabType"><span class="zh">打字</span>โหมดฝึกพิมพ์</div>
+    <div class="tab" data-mode="passage" id="tabPassage"><span class="zh">長文</span>โหมดพิมพ์ยาว/คำคม</div>
   </div>
 
   <div class="layout">
     <!-- LEFT: word list management -->
     <div class="panel">
-      <h2>คลังคำศัพท์</h2>
-      <div class="file-row">
-        <label class="btn" for="fileInput">อัปโหลดไฟล์</label>
-        <input type="file" id="fileInput" accept=".txt,.csv">
-        <button class="btn ghost" id="btnSample">ใช้ชุดตัวอย่าง</button>
-      </div>
-      <textarea id="wordlistInput" placeholder="你好,ㄋㄧˇ ㄏㄠˇ
+      <div id="wordlistPanelContent">
+        <h2>คลังคำศัพท์</h2>
+        <div class="file-row">
+          <label class="btn" for="fileInput">อัปโหลดไฟล์</label>
+          <input type="file" id="fileInput" accept=".txt,.csv">
+          <button class="btn ghost" id="btnSample">ใช้ชุดตัวอย่าง</button>
+        </div>
+        <textarea id="wordlistInput" placeholder="你好,ㄋㄧˇ ㄏㄠˇ
 謝謝,ㄒㄧㄝˋ ㄒㄧㄝ˙
 一,ㄧ"></textarea>
-      <div class="file-row" style="margin-top:8px;">
-        <button class="btn jade" id="btnApply">ใช้ชุดคำนี้</button>
+        <div class="file-row" style="margin-top:8px;">
+          <button class="btn jade" id="btnApply">ใช้ชุดคำนี้</button>
+        </div>
+        <div id="parseMsg"></div>
+        <div class="hint">
+          รูปแบบไฟล์: หนึ่งบรรทัดต่อหนึ่งคำ เขียนเป็น <code>ตัวอักษร,จู้อิน</code> (คั่นด้วยจุลภาคหรือแท็บ)
+          ถ้าเป็นคำหลายพยางค์ ให้เว้นวรรคระหว่างจู้อินแต่ละพยางค์ เช่น <code>你好,ㄋㄧˇ ㄏㄠˇ</code>.
+          รองรับไฟล์ .txt และ .csv — บรรทัดที่ขึ้นต้นด้วย <code>#</code> จะถูกข้าม
+        </div>
+        <div class="count-pill">คำในคลังตอนนี้: <b id="wordCount">0</b> คำ</div>
       </div>
-      <div id="parseMsg"></div>
-      <div class="hint">
-        รูปแบบไฟล์: หนึ่งบรรทัดต่อหนึ่งคำ เขียนเป็น <code>ตัวอักษร,จู้อิน</code> (คั่นด้วยจุลภาคหรือแท็บ)
-        ถ้าเป็นคำหลายพยางค์ ให้เว้นวรรคระหว่างจู้อินแต่ละพยางค์ เช่น <code>你好,ㄋㄧˇ ㄏㄠˇ</code>.
-        รองรับไฟล์ .txt และ .csv — บรรทัดที่ขึ้นต้นด้วย <code>#</code> จะถูกข้าม
+
+      <div id="passagePanelContent" style="display:none;">
+        <h2>คลังคำคม/ข้อความยาว</h2>
+        <div class="file-row">
+          <label class="btn" for="passageFileInput">อัปโหลดไฟล์</label>
+          <input type="file" id="passageFileInput" accept=".txt,.csv">
+          <button class="btn ghost" id="btnPassageSample">ใช้ชุดตัวอย่าง</button>
+        </div>
+        <textarea id="passageInput" placeholder="千里之行，始於足下,ㄑㄧㄢ ㄌㄧˇ ㄓ ㄒㄧㄥˊ ㄕˇ ㄩˊ ㄗㄨˊ ㄒㄧㄚˋ"></textarea>
+        <div class="file-row" style="margin-top:8px;">
+          <button class="btn jade" id="btnPassageApply">ใช้ชุดคำคมนี้</button>
+        </div>
+        <div id="passageMsg"></div>
+        <div class="hint">
+          หนึ่งบรรทัดต่อหนึ่งบทความ: <code>ข้อความเต็ม,จู้อินของแต่ละตัวอักษรจีน (เว้นวรรคคั่น)</code>.
+          ใส่จู้อินเฉพาะตัวอักษรจีน — เครื่องหมายวรรคตอน (， 。 ！ ๆลๆ) จะถูกข้ามให้อัตโนมัติ ไม่ต้องพิมพ์
+        </div>
+        <div class="count-pill">บทในคลังตอนนี้: <b id="passageCount">0</b> บท</div>
       </div>
-      <div class="count-pill">คำในคลังตอนนี้: <b id="wordCount">0</b> คำ</div>
     </div>
 
     <!-- RIGHT: practice area -->
@@ -289,8 +324,37 @@
               <button class="btn ghost" id="btnSkip">ข้าม</button>
             </div>
           </div>
-          <div class="kbd" id="kbd" style="margin-top:22px;"></div>
         </div>
+      </div>
+
+      <!-- PASSAGE (LONG-FORM) MODE -->
+      <div class="panel" id="passagePanel" style="display:none;">
+        <h2>พิมพ์ยาว: คำคม / ข้อความ</h2>
+        <div id="passageEmpty" class="empty">อัปโหลดหรือวางคำคมทางซ้าย แล้วกด “ใช้ชุดคำคมนี้” เพื่อเริ่มฝึก</div>
+        <div id="passageBody" style="display:none;">
+          <div class="file-row" id="passagePicker" style="justify-content:center;"></div>
+          <div class="passage-text" id="passageText"></div>
+          <div class="reveal-zone" style="margin-top:10px;">
+            <span class="zhuyin-big" id="passageTargetZhuyin" style="font-size:26px;"></span>
+          </div>
+          <div class="buffer-box" id="passageBufferBox" style="margin:10px auto;">&nbsp;</div>
+          <div class="controls-row">
+            <div class="stat"><b id="pStatTime">0:00</b><span>เวลา</span></div>
+            <div class="stat"><b id="pStatCorrect">0</b><span>ถูก</span></div>
+            <div class="stat"><b id="pStatWrong">0</b><span>ผิด</span></div>
+            <div class="stat"><b id="pStatAcc">100%</b><span>แม่นยำ</span></div>
+            <div class="stat"><b id="pStatSpeed">0</b><span>ตัว/นาที</span></div>
+          </div>
+          <div class="controls-row" style="margin-top:10px;">
+            <button class="btn ghost" id="btnPassageRestart">เริ่มบทนี้ใหม่</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SHARED VIRTUAL KEYBOARD (typing & passage modes) -->
+      <div class="panel" id="kbdPanel" style="display:none;">
+        <h2>แป้นพิมพ์เสมือน (ตำแหน่งจริงบนคีย์บอร์ด)</h2>
+        <div class="kbd" id="kbd"></div>
       </div>
 
     </div>
@@ -354,6 +418,14 @@ const SAMPLE = `# ตัวอย่างชุดคำเริ่มต้�
 你好,ㄋㄧˇ ㄏㄠˇ
 謝謝,ㄒㄧㄝˋ ㄒㄧㄝ˙`;
 
+const SAMPLE_PASSAGES = `千里之行，始於足下,ㄑㄧㄢ ㄌㄧˇ ㄓ ㄒㄧㄥˊ ㄕˇ ㄩˊ ㄗㄨˊ ㄒㄧㄚˋ
+活到老，學到老,ㄏㄨㄛˊ ㄉㄠˋ ㄌㄠˇ ㄒㄩㄝˊ ㄉㄠˋ ㄌㄠˇ
+一分耕耘，一分收穫,ㄧ ㄈㄣ ㄍㄥ ㄩㄣˊ ㄧ ㄈㄣ ㄕㄡ ㄏㄨㄛˋ
+天下無難事，只怕有心人,ㄊㄧㄢ ㄒㄧㄚˋ ㄨˊ ㄋㄢˊ ㄕˋ ㄓˇ ㄆㄚˋ ㄧㄡˇ ㄒㄧㄣ ㄖㄣˊ`;
+
+// chars we treat as punctuation / spacing inside a passage — displayed as-is, no typing required
+const PUNCT_RE = /[\s\u3000-\u303F\uFF00-\uFFEF!?.,;:()'"]/;
+
 /* ---------------- state ---------------- */
 let wordList = [];   // [{hanzi, zhuyin}]
 let charPool = [];   // [{char, zhuyin, word}]
@@ -362,6 +434,16 @@ let mode = 'read';
 let readOrder = [], readIdx = 0, readRevealed = false;
 let typeOrder = [], typeIdx = 0, buffer = '';
 let score = { correct: 0, attempts: 0 };
+
+let passages = [];          // [{hanzi:fullText, zhuyin:groupsString}]
+let currentPassageIdx = 0;
+let passageChars = [];      // [{char, zhuyin, punct, _wrong}]
+let passageCharIdx = 0;
+let passageBuffer = '';
+let passageStats = { correct: 0, wrong: 0 };
+let passageStartTime = null;
+let passageTimerHandle = null;
+let passageDoneFlag = false;
 
 /* ---------------- parsing ---------------- */
 function parseWordlist(text){
@@ -460,12 +542,20 @@ document.getElementById('fileInput').addEventListener('change', (e)=>{
 /* ---------------- tabs ---------------- */
 document.getElementById('tabRead').addEventListener('click', ()=> switchMode('read'));
 document.getElementById('tabType').addEventListener('click', ()=> switchMode('type'));
+document.getElementById('tabPassage').addEventListener('click', ()=> switchMode('passage'));
 function switchMode(m){
   mode = m;
   document.getElementById('tabRead').classList.toggle('active', m==='read');
   document.getElementById('tabType').classList.toggle('active', m==='type');
+  document.getElementById('tabPassage').classList.toggle('active', m==='passage');
+
   document.getElementById('readPanel').style.display = m==='read' ? '' : 'none';
   document.getElementById('typePanel').style.display = m==='type' ? '' : 'none';
+  document.getElementById('passagePanel').style.display = m==='passage' ? '' : 'none';
+  document.getElementById('kbdPanel').style.display = (m==='type' || m==='passage') ? '' : 'none';
+
+  document.getElementById('wordlistPanelContent').style.display = m==='passage' ? 'none' : '';
+  document.getElementById('passagePanelContent').style.display = m==='passage' ? '' : 'none';
 }
 
 /* ---------------- READ MODE ---------------- */
@@ -571,33 +661,212 @@ document.getElementById('btnBackspace').addEventListener('click', ()=>{
 document.getElementById('btnSubmit').addEventListener('click', submitType);
 document.getElementById('btnSkip').addEventListener('click', nextType);
 
+/* ---------------- PASSAGE (LONG-FORM) MODE ---------------- */
+const passageMsgEl = document.getElementById('passageMsg');
+const passageCountEl = document.getElementById('passageCount');
+
+function buildPassageChars(entry){
+  const chars = Array.from(entry.hanzi);
+  const groups = entry.zhuyin.split(/\s+/).filter(Boolean);
+  let gi = 0;
+  return chars.map(ch=>{
+    if(PUNCT_RE.test(ch)) return {char:ch, zhuyin:null, punct:true};
+    const zy = groups[gi]; gi++;
+    return {char:ch, zhuyin: zy || null, punct: !zy};
+  });
+}
+
+function applyPassages(text){
+  const {list, badLines} = parseWordlist(text); // same "hanzi,zhuyin" shape
+  if(list.length === 0){
+    passageMsgEl.textContent = 'ไม่พบข้อมูลที่ใช้ได้ ตรวจสอบรูปแบบอีกครั้ง';
+    passageMsgEl.className = 'err';
+    return;
+  }
+  passages = list;
+  passageCountEl.textContent = passages.length;
+  passageMsgEl.textContent = badLines>0
+    ? `โหลดสำเร็จ ${list.length} บท (ข้าม ${badLines} บรรทัดที่รูปแบบไม่ถูกต้อง)`
+    : `โหลดสำเร็จ ${list.length} บท`;
+  passageMsgEl.className = 'ok';
+  buildPassagePicker();
+  loadPassage(0);
+}
+
+function buildPassagePicker(){
+  const picker = document.getElementById('passagePicker');
+  picker.innerHTML = '';
+  passages.forEach((p,i)=>{
+    const b = document.createElement('button');
+    b.className = 'btn ghost';
+    b.style.fontSize = '12px';
+    b.style.padding = '6px 10px';
+    const preview = Array.from(p.hanzi).slice(0,10).join('');
+    b.textContent = (i+1)+'. '+preview+(Array.from(p.hanzi).length>10 ? '…' : '');
+    b.addEventListener('click', ()=> loadPassage(i));
+    picker.appendChild(b);
+  });
+  highlightPicker();
+}
+function highlightPicker(){
+  const picker = document.getElementById('passagePicker');
+  [...picker.children].forEach((b,i)=> b.classList.toggle('seal', i===currentPassageIdx));
+}
+
+function autoSkipPunct(){
+  while(passageChars[passageCharIdx] && (passageChars[passageCharIdx].punct || passageChars[passageCharIdx].zhuyin===null)){
+    passageCharIdx++;
+  }
+}
+
+function loadPassage(i){
+  currentPassageIdx = i;
+  const entry = passages[i];
+  passageChars = buildPassageChars(entry);
+  passageCharIdx = 0;
+  passageBuffer = '';
+  passageStats = { correct:0, wrong:0 };
+  passageStartTime = null;
+  passageDoneFlag = false;
+  stopPassageTimer();
+  autoSkipPunct();
+  highlightPicker();
+  updatePassageStats();
+  renderPassage();
+}
+
+function renderPassage(){
+  const empty = document.getElementById('passageEmpty');
+  const body = document.getElementById('passageBody');
+  if(passages.length === 0){ empty.style.display=''; body.style.display='none'; return; }
+  empty.style.display='none'; body.style.display='';
+
+  const container = document.getElementById('passageText');
+  container.innerHTML = '';
+  passageChars.forEach((item,i)=>{
+    const span = document.createElement('span');
+    let cls = 'pending';
+    if(item.punct){ cls = 'punct'; }
+    else if(i < passageCharIdx){ cls = item._wrong ? 'wrong' : 'correct'; }
+    else if(i === passageCharIdx){ cls = 'current'; }
+    span.className = 'pc ' + cls;
+    span.textContent = item.char;
+    container.appendChild(span);
+  });
+
+  const box = document.getElementById('passageBufferBox');
+  const targetZy = document.getElementById('passageTargetZhuyin');
+  const cur = passageChars[passageCharIdx];
+  if(cur){
+    box.textContent = passageBuffer || '\u00A0';
+    box.className = 'buffer-box';
+    targetZy.textContent = cur.zhuyin || '';
+  }
+  if(passageCharIdx >= passageChars.length){
+    finishPassage();
+  }
+}
+
+function passageEnsureTimerStarted(){
+  if(passageStartTime === null){
+    passageStartTime = Date.now();
+    startPassageTimer();
+  }
+}
+function passageAppend(sym, code){
+  if(passageDoneFlag) return;
+  passageEnsureTimerStarted();
+  passageBuffer += sym;
+  flashKey(code);
+  renderPassage();
+}
+function passageBackspace(){
+  if(passageDoneFlag) return;
+  passageBuffer = passageBuffer.slice(0,-1);
+  renderPassage();
+}
+function passageSubmit(){
+  if(passages.length === 0 || passageDoneFlag) return;
+  const cur = passageChars[passageCharIdx];
+  if(!cur) return;
+  passageEnsureTimerStarted();
+  const ok = cur.zhuyin !== null && passageBuffer === cur.zhuyin;
+  if(ok){ passageStats.correct++; } else { passageStats.wrong++; cur._wrong = true; }
+  passageBuffer = '';
+  passageCharIdx++;
+  autoSkipPunct();
+  updatePassageStats();
+  renderPassage();
+}
+function finishPassage(){
+  if(passageDoneFlag) return;
+  passageDoneFlag = true;
+  stopPassageTimer();
+  document.getElementById('passageTargetZhuyin').textContent = 'จบบทแล้ว 🎉 เลือกบทอื่น หรือกด "เริ่มบทนี้ใหม่"';
+  document.getElementById('passageBufferBox').textContent = '\u00A0';
+}
+function startPassageTimer(){
+  stopPassageTimer();
+  passageTimerHandle = setInterval(updatePassageStats, 500);
+}
+function stopPassageTimer(){
+  if(passageTimerHandle){ clearInterval(passageTimerHandle); passageTimerHandle = null; }
+}
+function updatePassageStats(){
+  const total = passageStats.correct + passageStats.wrong;
+  const acc = total>0 ? Math.round(passageStats.correct/total*100) : 100;
+  document.getElementById('pStatCorrect').textContent = passageStats.correct;
+  document.getElementById('pStatWrong').textContent = passageStats.wrong;
+  document.getElementById('pStatAcc').textContent = acc + '%';
+  let elapsedSec = passageStartTime ? (Date.now()-passageStartTime)/1000 : 0;
+  const mm = Math.floor(elapsedSec/60), ss = Math.floor(elapsedSec%60);
+  document.getElementById('pStatTime').textContent = mm+':'+String(ss).padStart(2,'0');
+  const minutes = elapsedSec/60;
+  const speed = minutes>0 ? Math.round(passageStats.correct/minutes) : 0;
+  document.getElementById('pStatSpeed').textContent = speed;
+}
+
+document.getElementById('btnPassageApply').addEventListener('click', ()=>{
+  applyPassages(document.getElementById('passageInput').value);
+});
+document.getElementById('btnPassageSample').addEventListener('click', ()=>{
+  document.getElementById('passageInput').value = SAMPLE_PASSAGES;
+  applyPassages(SAMPLE_PASSAGES);
+});
+document.getElementById('passageFileInput').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev)=>{
+    document.getElementById('passageInput').value = ev.target.result;
+    applyPassages(ev.target.result);
+  };
+  reader.onerror = ()=>{
+    passageMsgEl.textContent = 'อ่านไฟล์ไม่สำเร็จ ลองใหม่อีกครั้ง';
+    passageMsgEl.className = 'err';
+  };
+  reader.readAsText(file, 'utf-8');
+});
+document.getElementById('btnPassageRestart').addEventListener('click', ()=> loadPassage(currentPassageIdx));
+
 /* ---------------- physical keydown handling ---------------- */
 document.addEventListener('keydown', (e)=>{
   if(document.activeElement && document.activeElement.tagName === 'TEXTAREA') return;
-  if(mode !== 'type' || charPool.length === 0) return;
 
-  if(e.code === 'Space'){
-    e.preventDefault();
-    flashSpace();
-    submitType();
-    return;
+  if(mode === 'type'){
+    if(charPool.length === 0) return;
+    if(e.code === 'Space'){ e.preventDefault(); flashSpace(); submitType(); return; }
+    if(e.code === 'Enter'){ e.preventDefault(); submitType(); return; }
+    if(e.code === 'Backspace'){ e.preventDefault(); buffer = buffer.slice(0,-1); renderType(); return; }
+    if(KEYMAP[e.code]){ e.preventDefault(); buffer += KEYMAP[e.code]; flashKey(e.code); renderType(); return; }
   }
-  if(e.code === 'Enter'){
-    e.preventDefault();
-    submitType();
-    return;
-  }
-  if(e.code === 'Backspace'){
-    e.preventDefault();
-    buffer = buffer.slice(0,-1);
-    renderType();
-    return;
-  }
-  if(KEYMAP[e.code]){
-    e.preventDefault();
-    buffer += KEYMAP[e.code];
-    flashKey(e.code);
-    renderType();
+
+  if(mode === 'passage'){
+    if(passages.length === 0) return;
+    if(e.code === 'Space'){ e.preventDefault(); flashSpace(); passageSubmit(); return; }
+    if(e.code === 'Enter'){ e.preventDefault(); passageSubmit(); return; }
+    if(e.code === 'Backspace'){ e.preventDefault(); passageBackspace(); return; }
+    if(KEYMAP[e.code]){ e.preventDefault(); passageAppend(KEYMAP[e.code], e.code); return; }
   }
 });
 
@@ -605,6 +874,8 @@ document.addEventListener('keydown', (e)=>{
 buildKeyboard();
 document.getElementById('wordlistInput').value = SAMPLE;
 applyWordlist(SAMPLE);
+document.getElementById('passageInput').value = SAMPLE_PASSAGES;
+applyPassages(SAMPLE_PASSAGES);
 </script>
 </body>
 </html>
