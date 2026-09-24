@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สมุดบันทึกอารมณ์ · Wheel of Emotions</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🎡 สมุดบันทึก<span>อารมณ์</span></h1>
+    <p class="sub">เลือกอารมณ์หยาบๆ ก่อน แล้วค่อยๆ เจาะลึกลงไปทีละชั้น</p>
+  </header>
+
+  <!-- STEP 1: core -->
+  <section class="card" id="step1">
+    <h2>1. ตอนนี้คุณรู้สึกแบบไหน?</h2>
+    <div class="grid core-grid" id="coreGrid"></div>
+  </section>
+
+  <!-- STEP 2: level2 -->
+  <section class="card hidden" id="step2">
+    <div class="crumbs" id="crumbs2"></div>
+    <h2>2. ลองเจาะลึกอีกนิด...</h2>
+    <div class="grid" id="level2Grid"></div>
+    <div class="unsureRow">
+      <button class="unsureBtn" id="unsureAtCore">🤔 ไม่แน่ใจ รู้แค่นี้พอ บันทึกเลย</button>
+    </div>
+  </section>
+
+  <!-- STEP 3: level3 -->
+  <section class="card hidden" id="step3">
+    <div class="crumbs" id="crumbs3"></div>
+    <h2>3. เจาะจงแบบสุดๆ (ถ้าพอบอกได้)</h2>
+    <div class="grid" id="level3Grid"></div>
+    <div class="unsureRow">
+      <button class="unsureBtn" id="unsureAtLevel2">🤔 ไม่แน่ใจ แค่นี้พอ บันทึกเลย</button>
+    </div>
+  </section>
+
+  <!-- STEP 4: write & save -->
+  <section class="card hidden" id="step4">
+    <div class="crumbs" id="crumbs4"></div>
+    <h2>4. อยากเล่าอะไรเพิ่มไหม?</h2>
+    <div class="dateRow">
+      <label>วันที่ <input type="date" id="entryDate"></label>
+      <label>เวลา <input type="time" id="entryTime"></label>
+    </div>
+    <textarea id="entryText" placeholder="เกิดอะไรขึ้น... (จะเว้นว่างก็ได้)"></textarea>
+    <div class="row">
+      <button class="btn primary" id="saveBtn">💾 บันทึกลงไฟล์</button>
+      <button class="btn ghost" id="restartBtn">เริ่มใหม่</button>
+    </div>
+  </section>
+
+  <!-- ENTRIES LIST -->
+  <section class="card">
+    <h2>📖 บันทึกที่ผ่านมา</h2>
+    <div class="stats" id="stats"></div>
+    <div id="entries" class="entries"></div>
+  </section>
+</div>
+<script src="/app.js"></script>
+</body>
+</html>
