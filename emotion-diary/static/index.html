@@ -47,7 +47,21 @@
       <label>วันที่ <input type="date" id="entryDate"></label>
       <label>เวลา <input type="time" id="entryTime"></label>
     </div>
-    <textarea id="entryText" placeholder="เกิดอะไรขึ้น... (จะเว้นว่างก็ได้)"></textarea>
+    <div class="mdToolbar">
+      <button type="button" data-md="bold" title="ตัวหนา"><b>B</b></button>
+      <button type="button" data-md="italic" title="ตัวเอียง"><i>I</i></button>
+      <button type="button" data-md="h" title="หัวข้อ">H</button>
+      <button type="button" data-md="quote" title="คำพูด">&ldquo;</button>
+      <button type="button" data-md="ul" title="รายการ">• list</button>
+      <button type="button" data-md="ol" title="รายการเลข">1. list</button>
+      <button type="button" data-md="code" title="โค้ด">&lt;/&gt;</button>
+      <button type="button" data-md="link" title="ลิงก์">🔗</button>
+      <span class="mdSpacer"></span>
+      <button type="button" id="previewToggle">👁️ ดูตัวอย่าง</button>
+    </div>
+    <textarea id="entryText" placeholder="เกิดอะไรขึ้น... รองรับ Markdown เช่น **ตัวหนา** *ตัวเอียง* - รายการ (จะเว้นว่างก็ได้)"></textarea>
+    <div id="mdPreview" class="md-body hidden"></div>
+    <p class="mdHint">รองรับ Markdown: **ตัวหนา**, *ตัวเอียง*, # หัวข้อ, - รายการ, &gt; คำพูด, `โค้ด`, [ลิงก์](url)</p>
     <div class="row">
       <button class="btn primary" id="saveBtn">💾 บันทึกลงไฟล์</button>
       <button class="btn ghost" id="restartBtn">เริ่มใหม่</button>
